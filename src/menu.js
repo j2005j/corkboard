@@ -55,9 +55,22 @@ export function open(id, anchor, baseTilt) {
   ).join("");
   const customOn = note.color.startsWith("#") ? " on" : "";
 
+  // Phones: a static stack has no z-order to pin to and no rotation, so the
+  // pin row and the angle buttons only exist on the desktop menu.
+  const narrow = window.matchMedia("(max-width: 700px)").matches;
+  const pinRow = `
+    <button type="button" role="menuitem" data-act="pin">${icon("pin-bold")}<span>${note.pinned ? "Unpin" : "Pin to top"}</span></button>`;
+  const rotateBlock = `
+    <div class="gm-sep"></div>
+    <div class="gm-rotate">
+      <button type="button" role="menuitem" data-act="rot-dec" title="Rotate -15°">&minus;15°</button>
+      <button type="button" role="menuitem" data-act="rot-zero" title="Straighten">0°</button>
+      <button type="button" role="menuitem" data-act="rot-inc" title="Rotate +15°">+15°</button>
+    </div>`;
+
   el.innerHTML = `
     <button type="button" role="menuitem" data-act="duplicate">${icon("copy-bold")}<span>Duplicate</span></button>
-    <button type="button" role="menuitem" data-act="pin">${icon("pin-bold")}<span>${note.pinned ? "Unpin" : "Pin to top"}</span></button>
+    ${narrow ? "" : pinRow}
     <div class="gm-sep"></div>
     <div class="gm-colors" title="Change color">
       ${swatches}
@@ -66,12 +79,7 @@ export function open(id, anchor, baseTilt) {
         <span class="gm-rainbow"></span>
       </label>
     </div>
-    <div class="gm-sep"></div>
-    <div class="gm-rotate">
-      <button type="button" role="menuitem" data-act="rot-dec" title="Rotate −15°">−15°</button>
-      <button type="button" role="menuitem" data-act="rot-zero" title="Straighten">0°</button>
-      <button type="button" role="menuitem" data-act="rot-inc" title="Rotate +15°">+15°</button>
-    </div>
+    ${narrow ? "" : rotateBlock}
     <div class="gm-sep"></div>
     <button type="button" role="menuitem" data-act="copy-md">${icon("markdown-logo-bold")}<span>Copy as Markdown</span></button>
     <button type="button" role="menuitem" data-act="copy-html">${icon("code-bold")}<span>Copy as HTML</span></button>
