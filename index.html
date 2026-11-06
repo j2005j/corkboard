@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Corkboard</title>
+  <script>
+    // Apply the saved (or system) theme before first paint to avoid a flash.
+    try {
+      var t = localStorage.getItem("sticky-theme");
+      if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.dataset.theme = t;
+    } catch (e) { document.documentElement.dataset.theme = "light"; }
+    // Same for the motion + grain preferences (settings.js writes sticky-settings).
+    try {
+      var s = JSON.parse(localStorage.getItem("sticky-settings") || "{}");
+      document.documentElement.dataset.motion = s.motion === false ? "off" : "on";
+      document.documentElement.dataset.grain = s.grain === false ? "off" : "on";
+    } catch (e) {
+      document.documentElement.dataset.motion = "on";
+      document.documentElement.dataset.grain = "on";
+    }
+  </script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9F%A9%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+  <nav class="rail" aria-label="Tools">
+    <button class="rail-btn primary" id="btn-new" title="New note (N)" aria-label="New note">
+      <span data-icon="plus-bold"></span>
+    </button>
+    <button class="rail-btn" id="btn-settings" aria-pressed="false" title="Settings — note color, theme, sound, data" aria-label="Settings">
+      <span data-icon="gear-six-bold"></span>
+    </button>
+    <span class="rail-spacer"></span>
+    <button class="rail-btn" id="rail-vac" aria-pressed="false" title="Dust bag — completed notes" aria-label="Dust bag">
+      <span data-icon="broom-duotone"></span>
+      <span class="rail-count" id="rail-vac-count" hidden>0</span>
+    </button>
+    <button class="rail-btn" id="rail-trash" aria-pressed="false" title="Trash — kept for 30 days" aria-label="Trash">
+      <span data-icon="trash-duotone"></span>
+      <span class="rail-count" id="rail-trash-count" hidden>0</span>
+    </button>
+  </nav>
+
+  <main class="app" id="app">
+    <section class="board-area" id="board-area">
+      <div class="board" id="board">
+        <div class="empty-state" id="empty-state" hidden>
+          <span class="empty-icon" data-icon="broom-duotone"></span>
+          <h2>All clear&hellip; for now</h2>
+          <p>Double-click the board or press <kbd>N</kbd> to write your first note.</p>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel" id="panel" aria-hidden="true">
+      <div class="panel-inner">
+        <header class="panel-head">
+          <span class="panel-icon" id="panel-icon"></span>
+          <h2 id="panel-title">Dust bag</h2>
+          <span class="panel-count" id="panel-count">0</span>
+          <button class="icon-btn" id="panel-close" title="Close panel (Esc)"><span data-icon="x-bold"></span></button>
+        </header>
+        <div class="panel-search">
+          <span data-icon="magnifying-glass-bold"></span>
+          <input type="search" id="panel-search" placeholder="Search&hellip;" autocomplete="off">
+        </div>
+        <div class="panel-list" id="panel-list"></div>
+        <footer class="panel-foot" id="panel-foot" hidden>Notes in the trash are permanently deleted after 30 days.</footer>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Drop target pill: slides down from the top only while a note is dragged. -->
+  <div class="pill" id="fab-pill">
+    <button class="ball vac-ball" id="vac-ball" aria-pressed="false" title="Drop here to sweep into the dust bag">
+      <span data-icon="broom-duotone"></span>
+      <span class="ball-count" id="vac-count" hidden>0</span>
+    </button>
+    <button class="ball trash-ball" id="trash-ball" aria-pressed="false" title="Drop here to move to trash">
+      <span data-icon="trash-duotone"></span>
+      <span class="ball-count" id="trash-count" hidden>0</span>
+    </button>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <input type="file" id="import-file" accept="application/json,.json" hidden>
+
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-text">
+      <p id="modal-text"></p>
+      <div class="modal-actions">
+        <button class="btn ghost" id="modal-cancel">Cancel</button>
+        <button class="btn primary" id="modal-ok">Replace</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/marked.min.js"></script>
+  <script src="vendor/purify.min.js"></script>
+  <script src="vendor/turndown.min.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
