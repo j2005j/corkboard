@@ -1,6 +1,7 @@
 // In-memory note store, mirrored to IndexedDB.
 
 import * as db from "./db.js";
+import * as images from "./images.js";
 import { sanitize } from "./markdown.js";
 import { nextNoteColor, normalizeColor } from "./settings.js";
 
@@ -96,7 +97,7 @@ export function create({
   const now = Date.now();
   const note = {
     id: uuid(),
-    html,
+    html: images.toStorage(html),
     md,
     mode: ["rich", "md", "source"].includes(mode) ? mode : "rich",
     color: color == null ? nextNoteColor() : normalizeColor(color),
@@ -125,6 +126,9 @@ export function create({
 export function update(id, patch, { touch = true } = {}) {
   const note = notes.get(id);
   if (!note) return null;
+  // Anything that lands in note.html is forced to storage form: image
+  // references keep their id, blob srcs are dropped (they live in images.js).
+  if (typeof patch.html === "string") patch = { ...patch, html: images.toStorage(patch.html) };
   Object.assign(note, patch);
   if (touch) note.updatedAt = Date.now();
   db.put(note);
@@ -159,7 +163,21 @@ export function setState(id, state) {
 export function destroy(id) {
   if (!notes.delete(id)) return;
   db.remove(id);
+  images.prune(imageKeepSet()); // drop images no note references anymore
   emit();
+}
+
+// Ids of every image any current note still points at.
+function imageKeepSet() {
+  const keep = new Set();
+  const re = /data-cork-img="([^"]+)"/g;
+  for (const n of notes.values()) {
+    const html = n.html || "";
+    if (html.indexOf("data-cork-img") === -1) continue;
+    let m;
+    while ((m = re.exec(html))) keep.add(m[1]);
+  }
+  return keep;
 }
 
 export async function purgeExpired() {
@@ -169,7 +187,10 @@ export async function purgeExpired() {
     notes.delete(n.id);
     await db.remove(n.id);
   }
-  if (dead.length) emit();
+  if (dead.length) {
+    images.prune(imageKeepSet());
+    emit();
+  }
   return dead.length;
 }
 
@@ -189,7 +210,7 @@ export function exportData() {
 function normalize(n) {
   return {
     id: String(n.id),
-    html: sanitize(n.html || ""),
+    html: sanitize(images.toStorage(n.html || "")),
     md: typeof n.md === "string" ? n.md : null,
     mode: ["rich", "md", "source"].includes(n.mode) ? n.mode : "rich",
     color: normalizeColor(n.color),
@@ -218,6 +239,7 @@ export async function importData(data) {
   clean.forEach((n) => notes.set(n.id, n));
   await db.putMany(clean);
   zCounter = Math.max(10, ...clean.map((n) => n.z)) + 1;
+  images.prune(imageKeepSet()); // replaced everything: old images are orphans now
   emit();
   return clean.length;
 }

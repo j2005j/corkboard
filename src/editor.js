@@ -3,8 +3,10 @@
 // over the paper with the same typography as the rendered view.
 
 import * as store from "./store.js";
+import * as images from "./images.js";
 import { sanitize, mdToHtml, htmlToMd, escapeHtml } from "./markdown.js";
 import { icon } from "./icons.js";
+import { toast } from "./ui.js";
 
 const TABS_HTML = `
   <div class="mode-tabs">
@@ -91,6 +93,7 @@ export function mount(noteEl, note, onClose) {
       const ed = panels.querySelector(".editable");
       ed.innerHTML = note.html || "";
       ed.classList.toggle("note-empty", !note.html);
+      images.resolve(ed); // fill in pasted-image srcs from the local store
       ed.addEventListener("input", () => {
         ed.classList.toggle("note-empty", !ed.textContent.trim());
         schedule(harvestRich, 400);
@@ -170,8 +173,19 @@ export function mount(noteEl, note, onClose) {
   }
 
   function onRichPaste(e) {
-    e.preventDefault();
     const cd = e.clipboardData;
+    if (!cd) return;
+
+    // An image on the clipboard wins: store it locally and drop in a reference.
+    const item = [...(cd.items || [])].find((it) => it.kind === "file" && it.type.startsWith("image/"));
+    const file = item ? item.getAsFile() : [...(cd.files || [])].find((f) => f.type.startsWith("image/"));
+    if (file) {
+      e.preventDefault();
+      insertImage(file);
+      return;
+    }
+
+    e.preventDefault();
     const html = cd.getData("text/html");
     const text = cd.getData("text/plain");
     if (html) {
@@ -180,6 +194,33 @@ export function mount(noteEl, note, onClose) {
       document.execCommand("insertHTML", false, escapeHtml(text).replace(/\r?\n/g, "<br>"));
     }
     schedule(harvestRich, 100);
+  }
+
+  // Pasted bytes go to the browser-local image store; only the reference id
+  // ends up in the note (and therefore in any JSON export).
+  async function insertImage(file) {
+    const host = current && current.wrap.querySelector(".editable");
+    try {
+      const id = await images.put(file);
+      const tag = `<img data-cork-img="${id}" alt="pasted image">`;
+      // Put the caret back if the async store stole focus, insert at the
+      // selection, and guarantee the reference lands even when execCommand
+      // has no live range to insert into.
+      if (host) host.focus();
+      const ok = document.execCommand("insertHTML", false, tag);
+      if (!ok || (host && !host.querySelector(`img[data-cork-img="${id}"]`))) {
+        if (host) host.insertAdjacentHTML("beforeend", tag);
+      }
+      const ed = current && current.wrap.querySelector(".editable");
+      if (ed) {
+        ed.classList.remove("note-empty");
+        images.resolve(ed);
+      }
+      schedule(harvestRich, 100);
+    } catch (err) {
+      console.error("image paste failed:", err);
+      toast("Could not store the image (IndexedDB unavailable?)");
+    }
   }
 
   function onMdPaste(e, ta, prev) {
@@ -266,6 +307,7 @@ export function close() {
     view.innerHTML = note.html || "";
     view.classList.toggle("note-empty", !note.html);
     noteEl.dataset.html = note.html;
+    images.resolve(view);
   }
   if (onClose) onClose();
 }
