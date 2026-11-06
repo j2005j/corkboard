@@ -238,6 +238,7 @@ function renderSettings() {
   const colorValue = settings.get("colorValue");
   const hex = settings.isHex(colorValue) ? colorValue.toLowerCase() : "#ffec99";
   const theme = settings.getTheme();
+  const rail = document.documentElement.dataset.rail === "bottom" ? "bottom" : "left";
 
   const radio = (value, label) => `
     <label class="set-radio">
@@ -270,6 +271,13 @@ function renderSettings() {
           <span class="seg">
             <button type="button" data-set-theme="light" aria-pressed="${theme === "light"}">Light</button>
             <button type="button" data-set-theme="dark" aria-pressed="${theme === "dark"}">Dark</button>
+          </span>
+        </div>
+        <div class="set-row">
+          <span>Rail position</span>
+          <span class="seg">
+            <button type="button" data-set-rail="left" aria-pressed="${rail === "left"}">Left</button>
+            <button type="button" data-set-rail="bottom" aria-pressed="${rail === "bottom"}">Bottom</button>
           </span>
         </div>
         <div class="set-row">
@@ -353,6 +361,16 @@ function renderSettings() {
     b.addEventListener("click", () => {
       settings.setTheme(b.dataset.setTheme);
       listEl.querySelectorAll("[data-set-theme]").forEach((s) =>
+        s.setAttribute("aria-pressed", String(s === b))
+      );
+    });
+  });
+
+  // -- rail position (left / bottom)
+  listEl.querySelectorAll("[data-set-rail]").forEach((b) => {
+    b.addEventListener("click", () => {
+      settings.set("railPos", b.dataset.setRail);
+      listEl.querySelectorAll("[data-set-rail]").forEach((s) =>
         s.setAttribute("aria-pressed", String(s === b))
       );
     });

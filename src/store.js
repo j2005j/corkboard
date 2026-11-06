@@ -62,6 +62,20 @@ export function normRot(deg) {
   return a === 0 ? 0 : a; // avoid -0
 }
 
+// Mobile stack reorder: rewrite every z in one pass so the single emit
+// renders the final order instead of a half-swapped mix.
+export function reorder(ids) {
+  const touched = [];
+  ids.forEach((id) => {
+    const n = notes.get(id);
+    if (!n) return;
+    n.z = nextZ();
+    touched.push(n);
+  });
+  touched.forEach((n) => db.put(n));
+  if (touched.length) emit();
+}
+
 function uuid() {
   if (crypto.randomUUID) return crypto.randomUUID();
   return "n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);

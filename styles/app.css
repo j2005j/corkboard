@@ -144,6 +144,7 @@ body::before {
 
 /* ---------- left tool rail (wooden frame) ---------- */
 
+/* left rail (wooden frame); becomes a bottom bar via :root[data-rail="bottom"] */
 .rail {
   flex: none;
   width: 62px;
@@ -157,6 +158,23 @@ body::before {
   border-right: 1px solid var(--rail-border);
   box-shadow: inset -3px 0 6px rgba(0, 0, 0, 0.28);
   z-index: 60;
+}
+
+/* rail along the bottom: same wood, laid out as a row (tools left, bins right) */
+:root[data-rail="bottom"] body { flex-direction: column; }
+:root[data-rail="bottom"] .rail {
+  order: 2;
+  width: auto;
+  height: 58px;
+  flex-direction: row;
+  gap: 10px;
+  padding: 0 14px;
+  border-right: none;
+  border-top: 1px solid var(--rail-border);
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.28);
+}
+@media (max-width: 700px) {
+  :root[data-rail="bottom"] .rail { height: 54px; gap: 8px; padding: 0 10px; }
 }
 
 .rail-btn {
@@ -1219,7 +1237,9 @@ kbd {
     width: 100% !important;
     height: auto !important;
   }
-  .note {
+  /* scoped to board children: a flying clone lives on <body> and must keep
+     its fixed, note-sized styles (this used to blow clones up to full screen) */
+  .board > .note {
     position: static !important;
     width: 100% !important;
     height: auto !important;

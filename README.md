@@ -19,11 +19,12 @@ Any static file server works (`npx serve .`, nginx, GitHub Pages). Opening
 
 - Rich text, Markdown and raw HTML editing, done in place on the note itself
 - Pasting keeps formatting; stored HTML is sanitized with DOMPurify
-- Drag a note by its top bar; a pill with broom and trash targets slides in while dragging
-- Nine-dot grip: drag rotates (Shift = 15 degree steps), right-click straightens, left-click opens the menu (duplicate, color, pin, rotate, copy as Markdown/HTML/text)
+- Drag a note by its top bar; a pill with broom and trash targets slides in while dragging. On phones the bar drag reorders the stack instead
+- Nine-dot grip: drag rotates (Shift = 15 degree steps), right-click straightens, left-click opens the menu (duplicate, color, pin, rotate, copy as Markdown/HTML/text). On phones a tap opens the menu (rotation is off in portrait)
 - Dust bag for finished notes; trash keeps notes 30 days, then purges them
 - Settings: note color (yellow / random / palette / hex), theme, sound and volume, animations, paper grain, export / import / erase all
 - Light theme is a cork board with a wooden rail, dark is flat AMOLED black
+- Rail on the left or along the bottom (setting; bottom on phones by default)
 - IndexedDB storage, JSON export/import backup
 - Sounds on by default (mute + volume in settings); animations follow `prefers-reduced-motion`
 

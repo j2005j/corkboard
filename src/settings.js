@@ -14,6 +14,7 @@ const defaults = {
   colorValue: "#ffec99", // named palette color (preset) or hex (custom)
   motion: true,
   grain: true, // paper-like grain on the notes
+  railPos: null, // "left" | "bottom" | null = left on desktop, bottom on phones
 };
 
 let cfg = load();
@@ -28,6 +29,7 @@ function load() {
       colorValue: typeof raw.colorValue === "string" ? raw.colorValue : defaults.colorValue,
       motion: raw.motion !== false,
       grain: raw.grain !== false,
+      railPos: raw.railPos === "left" || raw.railPos === "bottom" ? raw.railPos : null,
     };
   } catch {
     return { ...defaults };
@@ -49,11 +51,13 @@ export function get(k) {
 export function set(k, v) {
   if (k === "motion") v = !!v;
   if (k === "grain") v = !!v;
+  if (k === "railPos") v = v === "left" || v === "bottom" ? v : null;
   if (k === "colorMode" && !COLOR_MODES.includes(v)) v = defaults.colorMode;
   cfg[k] = v;
   save();
   if (k === "motion") applyMotion();
   if (k === "grain") applyGrain();
+  if (k === "railPos") applyRail();
   emit(k);
 }
 
@@ -124,6 +128,21 @@ export function applyGrain() {
 
 export function grainEnabled() {
   return cfg.grain !== false;
+}
+
+// ---------- rail position ----------
+
+const isNarrow = () => window.matchMedia("(max-width: 700px)").matches;
+
+// Explicit choice wins; otherwise left on desktop, bottom on phones. Re-run
+// on breakpoint changes so rotating/resizing a device picks the right default.
+export function applyRail() {
+  const pos = cfg.railPos || (isNarrow() ? "bottom" : "left");
+  document.documentElement.dataset.rail = pos;
+}
+
+export function railPosition() {
+  return cfg.railPos;
 }
 
 // ---------- new-note color ----------

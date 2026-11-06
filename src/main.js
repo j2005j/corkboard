@@ -382,6 +382,8 @@ async function boot() {
 
   settings.applyMotion(); // honors the motion preference from the settings panel
   settings.applyGrain(); // paper grain on the notes (on by default)
+  settings.applyRail(); // left on desktop, bottom on phones, unless chosen
+  window.matchMedia("(max-width: 700px)").addEventListener("change", () => settings.applyRail());
 
   newBtn.addEventListener("click", newNote);
   importFile.addEventListener("change", () => onImportFile(importFile.files[0]));

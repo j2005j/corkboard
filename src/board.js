@@ -150,7 +150,11 @@ function createNoteEl(note) {
 }
 
 function startDrag(e, el, { openOnTap = true } = {}) {
-  if (isMobile() || e.button !== 0) return;
+  if (e.button !== 0) return;
+  if (isMobile()) {
+    startStackDrag(e, el); // portrait: the bar reorders the stack instead
+    return;
+  }
   const id = el.dataset.id;
   const note = store.get(id);
   if (!note || note.state !== "open") return;
@@ -220,12 +224,82 @@ const MIN_H = 110;
 // under 1 so the grip feels deliberate instead of whipping around.
 const ROTATE_SENS = 0.5;
 
+// Portrait phones: notes are a static stack, so the bar drag lifts a card and
+// drops it into a new position in that stack (z is rewritten in one pass).
+function startStackDrag(e, el) {
+  const id = el.dataset.id;
+  const note = store.get(id);
+  if (!note || note.state !== "open") return;
+  e.preventDefault();
+  try {
+    el.setPointerCapture(e.pointerId);
+  } catch {
+    /* ignore */
+  }
+
+  const pid = e.pointerId;
+  const sx = e.clientX;
+  const sy = e.clientY;
+  let moved = false;
+
+  const move = (ev) => {
+    if (ev.pointerId !== pid) return;
+    const dy = ev.clientY - sy;
+    if (!moved && Math.hypot(ev.clientX - sx, dy) < 8) return;
+    if (!moved) {
+      moved = true;
+      el.classList.add("dragging");
+    }
+    el.style.transform = `translateY(${dy}px)`;
+  };
+
+  const onUp = (ev) => finish(ev, false);
+  const onCancel = (ev) => finish(ev, true);
+
+  function finish(ev, cancelled) {
+    if (ev.pointerId !== pid) return;
+    window.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onCancel);
+    try {
+      el.releasePointerCapture(pid);
+    } catch {
+      /* ignore */
+    }
+    armClickSuppression(el); // a bar press never opens the editor
+    if (!moved) return;
+    el.classList.remove("dragging");
+    el.style.transform = "";
+    if (cancelled) return;
+
+    // Where does the card land? Compare the drop line against sibling midpoints.
+    const dropY = ev.clientY;
+    const siblings = [...board.querySelectorAll(".note")].filter((n) => n !== el);
+    const before = siblings.find((n) => {
+      const r = n.getBoundingClientRect();
+      return dropY < r.top + r.height / 2;
+    });
+    board.insertBefore(el, before || null);
+    const ids = [...board.querySelectorAll(".note")]
+      .map((n) => n.dataset.id)
+      .filter((nid) => {
+        const n = store.get(nid);
+        return n && n.state === "open";
+      });
+    store.reorder(ids); // one emit, so render sees the final order
+  }
+
+  window.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onCancel);
+}
+
 // Rotation via the nine-dot grip: hold the button and swing the mouse to tilt
 // the note around that corner, Shift snaps to 15° steps. A press that never
 // leaves the pivot is a plain click - it opens the grip's action menu (a
 // right-click on the grip is what straightens the note back to 0°).
 function startRotate(e, el) {
-  if (isMobile() || e.button !== 0) return;
+  if (e.button !== 0) return;
   const id = el.dataset.id;
   const note = store.get(id);
   if (!note || note.state !== "open") return;
@@ -233,6 +307,38 @@ function startRotate(e, el) {
   if (!grip) return;
   e.preventDefault();
   e.stopPropagation(); // the bar's drag must not start too
+
+  // Portrait phones: rotation is off (the stack is static), but a tap on the
+  // grip still opens its menu.
+  if (isMobile()) {
+    const pid = e.pointerId;
+    const sx = e.clientX;
+    const sy = e.clientY;
+    try {
+      el.setPointerCapture(pid);
+    } catch {
+      /* ignore */
+    }
+    const up = (ev) => {
+      if (ev.pointerId !== pid) return;
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      try {
+        el.releasePointerCapture(pid);
+      } catch {
+        /* ignore */
+      }
+      armClickSuppression(el); // the tap never opens the editor
+      if (Math.hypot(ev.clientX - sx, ev.clientY - sy) < 10) {
+        const base = note.rot != null ? store.normRot(note.rot) : tiltFor(id);
+        menu.open(id, grip.getBoundingClientRect(), base);
+      }
+    };
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    return;
+  }
+
   try {
     el.setPointerCapture(e.pointerId);
   } catch {

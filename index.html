@@ -11,14 +11,18 @@
       if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
       document.documentElement.dataset.theme = t;
     } catch (e) { document.documentElement.dataset.theme = "light"; }
-    // Same for the motion + grain preferences (settings.js writes sticky-settings).
+    // Same for the motion, grain and rail preferences (settings.js).
     try {
       var s = JSON.parse(localStorage.getItem("sticky-settings") || "{}");
       document.documentElement.dataset.motion = s.motion === false ? "off" : "on";
       document.documentElement.dataset.grain = s.grain === false ? "off" : "on";
+      var rp = s.railPos;
+      if (rp !== "left" && rp !== "bottom") rp = matchMedia("(max-width: 700px)").matches ? "bottom" : "left";
+      document.documentElement.dataset.rail = rp;
     } catch (e) {
       document.documentElement.dataset.motion = "on";
       document.documentElement.dataset.grain = "on";
+      document.documentElement.dataset.rail = "left";
     }
   </script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9F%A9%3C/text%3E%3C/svg%3E">
