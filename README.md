@@ -18,6 +18,7 @@ Any static file server works (`npx serve .`, nginx, GitHub Pages). Opening
 ## Features
 
 - Rich text, Markdown and raw HTML editing, done in place on the note itself
+- Paste images: bytes go to a local browser store, the note keeps only a reference (see Storage)
 - Pasting keeps formatting; stored HTML is sanitized with DOMPurify
 - Drag a note by its top bar; a pill with broom and trash targets slides in while dragging. On phones the bar drag reorders the stack instead
 - Nine-dot grip: drag rotates (Shift = 15 degree steps), right-click straightens, left-click opens the menu (duplicate, color, pin, rotate, copy as Markdown/HTML/text). On phones a tap opens the menu with duplicate, color and copy - pin and angles are desktop-only (rotation is off in portrait)
@@ -42,6 +43,11 @@ Any static file server works (`npx serve .`, nginx, GitHub Pages). Opening
 Everything stays in the browser: notes in IndexedDB (localStorage fallback),
 preferences in localStorage. Export downloads all notes as one JSON file,
 import replaces the current notes. Trash purges itself after 30 days.
+
+Pasted images are stored as blobs in their own IndexedDB table and the note
+only keeps a reference. The JSON export deliberately does NOT carry images:
+exporting warns you when notes contain them, and importing elsewhere shows
+those spots as missing.
 
 ## Layout
 

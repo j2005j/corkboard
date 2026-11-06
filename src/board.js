@@ -3,6 +3,7 @@
 import * as store from "./store.js";
 import * as editor from "./editor.js";
 import * as menu from "./menu.js";
+import * as images from "./images.js";
 import { icon } from "./icons.js";
 
 const area = document.getElementById("board-area");
@@ -79,6 +80,7 @@ function setViewContent(el, html) {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
   });
+  images.resolve(view); // pasted images: reference -> local blob
   el.dataset.html = html || "";
 }
 

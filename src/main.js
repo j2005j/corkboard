@@ -251,6 +251,15 @@ function newNote() {
 // ---------- export / import ----------
 
 async function onExport() {
+  // Images are browser-local by design; tell the user before the file lands.
+  const withImgs = store.all().filter((n) => (n.html || "").includes("data-cork-img")).length;
+  if (withImgs) {
+    const ok = await confirmDialog(
+      `${withImgs} note${withImgs === 1 ? "" : "s"} contain pasted images. Images live only in this browser and are NOT part of the JSON file - importing elsewhere will show those spots as missing. Export anyway?`,
+      "Export"
+    );
+    if (!ok) return;
+  }
   doExport();
   toast("Exported your notes as JSON");
 }
@@ -266,6 +275,7 @@ async function onImportFile(file) {
     const data = await readImportFile(file);
     const count = (Array.isArray(data) ? data : data && data.notes || []).length;
     if (!count) throw new Error("That file doesn't contain notes.");
+    const hasImgs = JSON.stringify(data).includes("data-cork-img");
     const ok = await confirmDialog(
       `Replace everything with ${count} note${count === 1 ? "" : "s"} from this file? Your current notes will be lost.`,
       "Import"
@@ -273,7 +283,7 @@ async function onImportFile(file) {
     if (!ok) return;
     const n = await store.importData(data);
     panels.close();
-    toast(`Imported ${n} note${n === 1 ? "" : "s"}`);
+    toast(`Imported ${n} note${n === 1 ? "" : "s"}${hasImgs ? " - images are not in the backup" : ""}`);
   } catch (err) {
     toast(err.message || "Import failed");
   }
