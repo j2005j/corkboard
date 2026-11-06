@@ -1,4 +1,4 @@
-/* Sticky Notes — app styles
+/* Sticky Notes - app styles
    Light theme: cork bulletin board + wooden tool rail.
    Dark theme: AMOLED flat black, dotted board, no skeuomorphism. */
 
@@ -36,7 +36,7 @@
 
   /* --- light: cork board --- */
   --board-color: #c9a06a;
-  /* vignette (edges of the board) + fine cork grain — the scattered pore dots
+  /* vignette (edges of the board) + fine cork grain - the scattered pore dots
       are gone; the texture lives on a viewport-fixed layer (body::before), so
       opening the panel can never shift it */
   --board-image:
@@ -131,7 +131,7 @@ body {
 button { font-family: inherit; }
 
 /* The cork board texture lives on a viewport-fixed layer: the vignette and
-   grain never move — opening the panel only shrinks the board's view of them. */
+   grain never move - opening the panel only shrinks the board's view of them. */
 body::before {
   content: "";
   position: fixed;
@@ -242,7 +242,7 @@ body::before {
   overflow: auto;
   position: relative;
   min-width: 0;
-  /* background: body::before (fixed cork layer) — intentionally none */
+  /* background: body::before (fixed cork layer) - intentionally none */
 }
 
 .board {
@@ -440,7 +440,7 @@ kbd {
 
 .note.editing { transform: none; }
 .note.editing .note-chrome { display: none; }
-/* the real view hides while editing — the editable wears .note-view too, so
+/* the real view hides while editing - the editable wears .note-view too, so
    the selector must not catch it */
 .note.editing > .note-view { display: none; }
 
@@ -539,7 +539,7 @@ kbd {
   padding: 0;
 }
 
-/* Rich editing is transparent over the paper — the editable carries the
+/* Rich editing is transparent over the paper - the editable carries the
    .note-view class, so padding, font and heading styles match the rendered
    view exactly (WYSIWYG: what you see is what the view shows). */
 .editable {

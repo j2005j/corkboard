@@ -17,7 +17,7 @@ let lastOrder = "";
 let drag = null;
 
 // Pointer capture retargets the click after a bar/resize press to the note
-// element itself, so closest() can't tell where the press started — remember it.
+// element itself, so closest() can't tell where the press started - remember it.
 let suppressClickEl = null;
 let suppressTimer = 0;
 function armClickSuppression(el) {
@@ -82,7 +82,7 @@ function setViewContent(el, html) {
   el.dataset.html = html || "";
 }
 
-// The note's default tilt — every note lands slightly askew (±5°), unique per
+// The note's default tilt - every note lands slightly askew (±5°), unique per
 // id so the board looks hand-placed. 0° is never the default (right-click
 // straightens explicitly), so a fresh id can't come out perfectly straight.
 function tiltFor(id) {
@@ -99,7 +99,7 @@ function createNoteEl(note) {
   el.tabIndex = 0;
   el.innerHTML = `
     <div class="note-chrome">
-      <span class="note-btn grip" title="Rotate — drag to tilt, left-click for the menu, right-click to straighten (Shift = 15° steps)" aria-hidden="true">${icon("dots-nine-bold")}</span>
+      <span class="note-btn grip" title="Rotate - drag to tilt, left-click for the menu, right-click to straighten (Shift = 15° steps)" aria-hidden="true">${icon("dots-nine-bold")}</span>
       <div class="note-actions">
         <span class="note-btn pin-flag" title="Pinned to the top">${icon("pin-bold")}</span>
         <button class="note-btn done" title="Sweep into the dust bag">${icon("check-bold")}</button>
@@ -109,7 +109,7 @@ function createNoteEl(note) {
     <div class="note-view"></div>
     <div class="note-resize" title="Resize"></div>`;
 
-  // The whole top bar drags the note — except the action buttons and the grip.
+  // The whole top bar drags the note - except the action buttons and the grip.
   el.querySelector(".note-chrome").addEventListener("pointerdown", (e) => {
     if (e.button !== 0 || e.target.closest(".note-actions, .grip")) return;
     startDrag(e, el, { openOnTap: false });
@@ -139,7 +139,7 @@ function createNoteEl(note) {
       clearTimeout(suppressTimer);
       return;
     }
-    // Clicking the drag bar or its buttons never opens the editor — only the body does.
+    // Clicking the drag bar or its buttons never opens the editor - only the body does.
     if (e.target.closest("button, a, .note-chrome, .note-resize")) return;
     const sel = window.getSelection();
     if (sel && !sel.isCollapsed && el.contains(sel.anchorNode)) return;
@@ -216,13 +216,13 @@ function startDrag(e, el, { openOnTap = true } = {}) {
 
 const MIN_W = 160;
 const MIN_H = 110;
-// How far the note turns per degree of mouse sweep around the pivot — well
+// How far the note turns per degree of mouse sweep around the pivot - well
 // under 1 so the grip feels deliberate instead of whipping around.
 const ROTATE_SENS = 0.5;
 
 // Rotation via the nine-dot grip: hold the button and swing the mouse to tilt
 // the note around that corner, Shift snaps to 15° steps. A press that never
-// leaves the pivot is a plain click — it opens the grip's action menu (a
+// leaves the pivot is a plain click - it opens the grip's action menu (a
 // right-click on the grip is what straightens the note back to 0°).
 function startRotate(e, el) {
   if (isMobile() || e.button !== 0) return;
@@ -239,7 +239,7 @@ function startRotate(e, el) {
     /* ignore */
   }
 
-  // The pivot is the grip itself — also the rotation origin, so it stays put.
+  // The pivot is the grip itself - also the rotation origin, so it stays put.
   const gr = grip.getBoundingClientRect();
   const start = {
     pid: e.pointerId,
@@ -257,7 +257,7 @@ function startRotate(e, el) {
     const dx = ev.clientX - start.px;
     const dy = ev.clientY - start.py;
     const r = Math.hypot(dx, dy);
-    if (r < 12) return; // the press starts on the pivot — no stable angle yet
+    if (r < 12) return; // the press starts on the pivot - no stable angle yet
     const ang = (Math.atan2(dy, dx) * 180) / Math.PI;
     if (start.ang === null) {
       start.ang = ang;

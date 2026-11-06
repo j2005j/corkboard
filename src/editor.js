@@ -1,5 +1,5 @@
 // Note editor: rich (contenteditable), Markdown and HTML source modes.
-// The editor mounts in place — the text area is the note itself, transparent
+// The editor mounts in place - the text area is the note itself, transparent
 // over the paper with the same typography as the rendered view.
 
 import * as store from "./store.js";
@@ -31,7 +31,7 @@ const FMT_HTML = `
     <button type="button" data-cmd="removeFormat" title="Clear formatting">${icon("eraser-bold")}</button>
   </div>`;
 
-// The top strip: the three mode tabs, then the format toolbar under them —
+// The top strip: the three mode tabs, then the format toolbar under them -
 // both in one column so narrow notes just wrap rows instead of overflowing.
 const BAR_HTML = `
   <div class="edit-bar">

@@ -113,7 +113,7 @@ async function doTrash(id, ballEl = railTrash) {
   const fly = anim.crumpleAway(el, ballEl);
   await fly;
   store.setState(id, "trash");
-  toast("Moved to trash — kept for 30 days");
+  toast("Moved to trash - kept for 30 days");
 }
 
 async function doPullOut(id, miniEl) {
@@ -220,7 +220,7 @@ function bestSpot(note) {
 
 // ---------- new note ----------
 
-// A fresh note lands somewhere random in the visible board — scatter tries a
+// A fresh note lands somewhere random in the visible board - scatter tries a
 // few candidates so it doesn't pile straight onto an existing note (but the
 // request is "random", so a full board still gets one).
 function newNote() {
@@ -290,7 +290,7 @@ async function onEraseTrash() {
   );
   if (!ok) return;
   sound.play("erase"); // the recycle2 chime, synced with the snap
-  // Every card blurs into dust (staggered), THEN the notes are really gone —
+  // Every card blurs into dust (staggered), THEN the notes are really gone -
   // so the animation is the erase, not a curtain in front of it.
   const minis = [...document.querySelectorAll("#panel-list .mini")];
   await Promise.all(minis.map((el, i) => anim.dustAway(el, i * 70)));
@@ -302,7 +302,7 @@ async function onEraseAll() {
   const list = store.all();
   if (!list.length) return;
   const ok = await confirmDialog(
-    `Erase ALL ${list.length} notes — the board, the dust bag and the trash? This cannot be undone.`,
+    `Erase ALL ${list.length} notes - the board, the dust bag and the trash? This cannot be undone.`,
     "Erase all"
   );
   if (!ok) return;
@@ -334,10 +334,10 @@ function maybeWelcome() {
       "<p>These are your sticky notes. A few things to try:</p>" +
       "<ul>" +
       "<li><b>Double-click</b> the board (or press <kbd>N</kbd>) to write a new note</li>" +
-      "<li><b>Drag</b> a note by its top bar — a pill slides down from the top to sweep or trash it</li>" +
+      "<li><b>Drag</b> a note by its top bar - a pill slides down from the top to sweep or trash it</li>" +
       "<li>Grab the <b>bottom-right corner</b> to resize a note</li>" +
-      "<li>Click a note's body to edit — Rich, <b>Markdown</b> or raw <b>HTML</b></li>" +
-      "<li>Left-click the <b>nine-dot grip</b> for duplicate, color, pin &amp; rotate — right-click it to straighten</li>" +
+      "<li>Click a note's body to edit - Rich, <b>Markdown</b> or raw <b>HTML</b></li>" +
+      "<li>Left-click the <b>nine-dot grip</b> for duplicate, color, pin &amp; rotate - right-click it to straighten</li>" +
       "<li>The wooden rail keeps the essentials; the <b>⚙ gear</b> opens settings (theme, sound, backup, erase)</li>" +
       "<li>Everything is stored <b>in your browser</b>. Export JSON to back it up</li>" +
       "</ul>",

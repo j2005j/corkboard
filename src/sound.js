@@ -1,8 +1,8 @@
-// Tiny synthesized sound effects (Web Audio), off by default.
+// Synthesized sound effects (Web Audio) plus vendored samples, ON by default.
 
 const KEY = "sticky-sound";
 const VOL_KEY = "sticky-volume";
-let enabled = localStorage.getItem(KEY) === "1";
+let enabled = localStorage.getItem(KEY) !== "0"; // on unless muted
 let volume = loadVolume(); // 0..1, default 100%
 let ctx = null;
 let master = null; // one gain stage every synth voice passes through
